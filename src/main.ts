@@ -32,6 +32,7 @@ const livesEl = required(document.querySelector<HTMLElement>("#lives"), "Les vie
 const message = required(document.querySelector<HTMLElement>("#message"), "Le message");
 const messageCopy = required(document.querySelector<HTMLElement>("#message-copy"), "Le texte");
 const startButton = required(document.querySelector<HTMLButtonElement>("#start"), "Le bouton");
+const resultTitle = required(document.querySelector<HTMLImageElement>("#result-title"), "Le verdict");
 const bossHud = required(document.querySelector<HTMLElement>("#boss-hud"), "L’interface du boss");
 const bossHealth = required(document.querySelector<HTMLElement>("#boss-health"), "La vie du boss");
 const targetNameEl = required(document.querySelector<HTMLElement>("#target-name"), "Le nom de cible");
@@ -69,6 +70,7 @@ const playerProfile = playerProfiles.find((profile) =>
   profile.name.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase() === normalizedPlayer
 );
 const startsEvolved = params.get("form")?.toLowerCase() === "evolved";
+const previewResult = params.get("result")?.toLowerCase();
 const evolutionScore = 720;
 const background = new Image();
 const avatar = new Image();
@@ -223,6 +225,7 @@ function startGame() {
   reset();
   running = true;
   lastTime = performance.now();
+  message.classList.remove("result", "victory", "defeat");
   message.classList.add("hidden");
   bossHud.classList.remove("hidden");
   requestAnimationFrame(loop);
@@ -231,6 +234,11 @@ function startGame() {
 function finishGame(victory: boolean) {
   running = false;
   bossHud.classList.add("hidden");
+  message.classList.add("result");
+  message.classList.toggle("victory", victory);
+  message.classList.toggle("defeat", !victory);
+  resultTitle.src = `${import.meta.env.BASE_URL}assets/results/${victory ? "victory" : "defeat"}.png`;
+  resultTitle.alt = victory ? "TU AS GAGNÉ" : "TU AS PERDU";
   const kicker = required(message.querySelector<HTMLElement>(".title-kicker"), "Le surtitre");
   const subtitle = required(message.querySelector<HTMLElement>(".title-subtitle"), "Le sous-titre");
 
@@ -873,3 +881,6 @@ window.addEventListener("resize", resizeGame);
 
 bossHud.classList.add("hidden");
 resizeGame();
+if (previewResult === "victory" || previewResult === "defeat") {
+  finishGame(previewResult === "victory");
+}

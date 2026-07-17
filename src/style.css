@@ -296,13 +296,76 @@ dd {
   filter: drop-shadow(0 14px 28px rgba(0, 6, 30, 0.62));
 }
 
-.title-lockup img {
+.title-lockup .game-title {
   display: block;
   width: 100%;
   height: auto;
   max-height: min(34vh, 330px);
   margin: clamp(-26px, -3vh, -10px) 0;
   object-fit: contain;
+}
+
+.result-title {
+  display: none;
+  width: min(96vw, 1040px);
+  height: auto;
+  max-height: 28vh;
+  margin: clamp(8px, 2vh, 20px) 0;
+  object-fit: contain;
+}
+
+.message.result .game-title {
+  display: none;
+}
+
+.message.result .result-title {
+  display: block;
+}
+
+.message.result {
+  background:
+    radial-gradient(circle at 50% 45%, rgba(9, 35, 73, 0.18), rgba(2, 6, 20, 0.86) 72%),
+    rgba(2, 6, 20, 0.52);
+  backdrop-filter: blur(4px);
+}
+
+.message.result.victory {
+  background:
+    radial-gradient(circle at 50% 45%, rgba(30, 150, 89, 0.22), rgba(2, 8, 22, 0.88) 72%),
+    rgba(2, 8, 22, 0.55);
+}
+
+.message.result.defeat {
+  background:
+    radial-gradient(circle at 50% 45%, rgba(181, 34, 65, 0.25), rgba(11, 3, 18, 0.9) 72%),
+    rgba(11, 3, 18, 0.58);
+}
+
+.message.result .title-kicker {
+  font-size: clamp(0.78rem, 1.5vw, 1rem);
+}
+
+.message.result .title-subtitle {
+  font-size: clamp(1.08rem, 2.4vw, 1.55rem);
+}
+
+.message.result > p {
+  max-width: 760px;
+  padding: 14px 22px;
+  border: 1px solid rgba(169, 225, 255, 0.24);
+  border-radius: 14px;
+  color: #f3fbff;
+  background: rgba(3, 10, 27, 0.7);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
+  font-size: clamp(1.02rem, 2vw, 1.24rem);
+}
+
+.message.result.victory > p {
+  border-color: rgba(116, 239, 164, 0.34);
+}
+
+.message.result.defeat > p {
+  border-color: rgba(255, 109, 133, 0.38);
 }
 
 .title-kicker {
@@ -536,8 +599,12 @@ footer p {
     width: min(104vw, 700px);
   }
 
-  .title-lockup img {
+  .title-lockup .game-title {
     max-height: 25vh;
+  }
+
+  .result-title {
+    max-height: 19vh;
   }
 
   .message > p {
@@ -557,8 +624,12 @@ footer p {
     padding-top: 18px;
   }
 
-  .title-lockup img {
+  .title-lockup .game-title {
     max-height: 29vh;
+  }
+
+  .result-title {
+    max-height: 24vh;
   }
 
   .message > p {
