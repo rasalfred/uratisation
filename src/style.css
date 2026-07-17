@@ -247,8 +247,8 @@ dd {
 @media (min-width: 1300px) {
   .boss-hud {
     top: max(14px, env(safe-area-inset-top));
-    width: min(560px, calc(100% - 720px));
-    min-width: 480px;
+    width: min(720px, calc(100% - 680px));
+    min-width: 620px;
   }
 }
 
@@ -387,6 +387,79 @@ footer {
 
 footer p {
   margin: 0;
+}
+
+@media (min-width: 900px) {
+  .compact-brand small,
+  dt,
+  .boss-rank,
+  footer,
+  .message small,
+  .title-kicker {
+    font-size: 0.88rem;
+  }
+
+  .compact-brand strong {
+    font-size: 1.34rem;
+  }
+
+  .compact-brand > i {
+    width: 42px;
+    height: 42px;
+    font-size: 1.1rem;
+  }
+
+  .stats {
+    padding: 13px 18px;
+  }
+
+  dd {
+    font-size: 1.14rem;
+  }
+
+  .boss-hud {
+    padding-top: 14px;
+    padding-bottom: 16px;
+  }
+
+  .boss-heading strong {
+    font-size: 1.3rem;
+  }
+
+  #shield-state {
+    font-size: 0.86rem;
+  }
+
+  .health-track {
+    height: 14px;
+    margin-top: 11px;
+  }
+
+  .title-kicker {
+    font-size: 0.94rem;
+  }
+
+  .title-subtitle {
+    font-size: 1.36rem;
+  }
+
+  .message > p {
+    max-width: 760px;
+    font-size: 1.24rem;
+  }
+
+  .message button {
+    padding-left: 30px;
+    font-size: 0.96rem;
+  }
+
+  .message small {
+    font-size: 0.86rem;
+  }
+
+  footer {
+    font-size: 0.92rem;
+  }
 }
 
 .status-dot {
