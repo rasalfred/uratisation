@@ -14,6 +14,11 @@ type Weed = Body & {
 type Projectile = Body & { hostile: boolean; damage: number };
 type Particle = Body & { life: number; maxLife: number; color: string };
 type FloatingText = Point & { text: string; color: string; life: number; vy: number };
+type PlayerProfile = {
+  name: string;
+  discordId: string;
+  asset: string;
+};
 
 function required<T>(value: T | null, label: string): T {
   if (!value) throw new Error(`${label} est indisponible.`);
@@ -40,13 +45,44 @@ const params = new URLSearchParams(window.location.search);
 const rawTargetName = params.get("target")?.trim();
 const targetName = rawTargetName?.slice(0, 28) || "Membre du staff";
 const avatarUrl = params.get("avatar");
+const playerProfiles: PlayerProfile[] = [
+  { name: "HYDRO", discordId: "520271784205877248", asset: "hydro" },
+  { name: "RASA", discordId: "1001791703113531394", asset: "rasa" },
+  { name: "RIM", discordId: "702201596792012842", asset: "rim" },
+  { name: "URA", discordId: "738649509629788180", asset: "ura" },
+  { name: "ÉMY", discordId: "316299480246910999", asset: "emy" },
+];
+const requestedPlayer = (
+  params.get("playerId") ??
+  params.get("actorId") ??
+  params.get("userId") ??
+  params.get("player") ??
+  params.get("actor") ??
+  ""
+).trim();
+const normalizedPlayer = requestedPlayer
+  .normalize("NFD")
+  .replace(/\p{Diacritic}/gu, "")
+  .toLowerCase();
+const playerProfile = playerProfiles.find((profile) =>
+  profile.discordId === requestedPlayer ||
+  profile.name.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase() === normalizedPlayer
+);
+const startsEvolved = params.get("form")?.toLowerCase() === "evolved";
+const evolutionScore = 720;
 const background = new Image();
 const avatar = new Image();
-const playerSprite = new Image();
+const playerSpriteBase = new Image();
+const playerSpriteEvolved = new Image();
 const weedSprites = new Image();
 
 background.src = `${import.meta.env.BASE_URL}assets/arena-modern-responsive.png`;
-playerSprite.src = `${import.meta.env.BASE_URL}assets/blue-flower-guardian.png`;
+playerSpriteBase.src = playerProfile
+  ? `${import.meta.env.BASE_URL}assets/players/${playerProfile.asset}-base.png`
+  : `${import.meta.env.BASE_URL}assets/blue-flower-guardian.png`;
+playerSpriteEvolved.src = playerProfile
+  ? `${import.meta.env.BASE_URL}assets/players/${playerProfile.asset}-evolved.png`
+  : `${import.meta.env.BASE_URL}assets/blue-flower-guardian.png`;
 weedSprites.src = `${import.meta.env.BASE_URL}assets/weed-guardians.png`;
 avatar.crossOrigin = "anonymous";
 let avatarReady = false;
@@ -55,6 +91,12 @@ if (avatarUrl && /^https:\/\//i.test(avatarUrl)) {
   avatar.src = avatarUrl;
 }
 targetNameEl.textContent = targetName;
+const brandKicker = document.querySelector<HTMLElement>(".compact-brand small");
+const brandName = document.querySelector<HTMLElement>(".compact-brand strong");
+if (playerProfile && brandKicker && brandName) {
+  brandKicker.textContent = "Team Blue Flower";
+  brandName.textContent = playerProfile.name;
+}
 
 const keys = new Set<string>();
 const player: Body = { x: viewWidth / 2, y: viewHeight - 90, radius: 19, vx: 0, vy: 0 };
@@ -86,6 +128,7 @@ let pointerActive = false;
 let protectionStage = 0;
 let shieldMessageCooldown = 0;
 let screenShake = 0;
+let playerEvolved = startsEvolved;
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 const collides = (a: Body, b: Body) => Math.hypot(a.x - b.x, a.y - b.y) < a.radius + b.radius;
@@ -159,6 +202,7 @@ function reset() {
   protectionStage = 0;
   shieldMessageCooldown = 0;
   screenShake = 0;
+  playerEvolved = startsEvolved;
   spawnProtectionWave(6);
   updateHud();
 }
@@ -296,6 +340,21 @@ function burst(x: number, y: number, color: string, count = 12) {
   }
 }
 
+function tryEvolvePlayer() {
+  if (!playerProfile || playerEvolved || score < evolutionScore) return;
+  playerEvolved = true;
+  screenShake = 10;
+  burst(player.x, player.y - 42, "#72ddff", 52);
+  floatingTexts.push({
+    x: player.x,
+    y: player.y - 96,
+    text: `${playerProfile.name} ÉVOLUE !`,
+    color: "#d6f8ff",
+    life: 2,
+    vy: -22,
+  });
+}
+
 function damagePlayer() {
   if (invulnerable > 0) return;
   lives -= 1;
@@ -419,6 +478,8 @@ function update(dt: number) {
       damagePlayer();
     }
   }
+
+  tryEvolvePlayer();
 
   projectiles = projectiles.filter((projectile) =>
     projectile.radius > 0 &&
@@ -666,11 +727,14 @@ function drawPlayer() {
   ctx.fill();
   ctx.globalAlpha = 1;
 
-  if (playerSprite.complete && playerSprite.naturalWidth > 0) {
-    const height = clamp(Math.min(viewWidth, viewHeight) * 0.28, 120, 180);
-    const width = height * (playerSprite.naturalWidth / playerSprite.naturalHeight);
+  const activePlayerSprite = playerEvolved ? playerSpriteEvolved : playerSpriteBase;
+  if (activePlayerSprite.complete && activePlayerSprite.naturalWidth > 0) {
+    const height = playerProfile
+      ? clamp(Math.min(viewWidth, viewHeight) * 0.18, 98, 142) * (playerEvolved ? 1.1 : 1)
+      : clamp(Math.min(viewWidth, viewHeight) * 0.28, 120, 180);
+    const width = height * (activePlayerSprite.naturalWidth / activePlayerSprite.naturalHeight);
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(playerSprite, -width / 2, -height + 25, width, height);
+    ctx.drawImage(activePlayerSprite, -width / 2, -height + 25, width, height);
     ctx.restore();
     return;
   }
@@ -802,7 +866,8 @@ canvas.addEventListener("pointerup", () => { pointerActive = false; });
 canvas.addEventListener("pointercancel", () => { pointerActive = false; });
 startButton.addEventListener("click", startGame);
 background.addEventListener("load", draw);
-playerSprite.addEventListener("load", draw);
+playerSpriteBase.addEventListener("load", draw);
+playerSpriteEvolved.addEventListener("load", draw);
 weedSprites.addEventListener("load", draw);
 window.addEventListener("resize", resizeGame);
 

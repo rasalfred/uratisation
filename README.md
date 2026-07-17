@@ -18,13 +18,16 @@ Le prototype accepte ZQSD, WASD, les flèches, la souris et le tactile.
 
 ## Cible Discord
 
-La cible peut être injectée dans l'URL avec deux paramètres :
+La cible et le joueur peuvent être injectés dans l'URL avec ces paramètres :
 
 ```text
-?target=NomDuMembre&avatar=https://cdn.discordapp.com/avatars/...
+?target=NomDuMembre&avatar=https://cdn.discordapp.com/avatars/...&playerId=520271784205877248
 ```
 
 - `target` définit le nom affiché au-dessus de la barre de vie ;
+- `playerId` choisit automatiquement le Pokémon du membre Blue Flower qui lance la partie ;
+- `player` accepte aussi son pseudo (`HYDRO`, `RASA`, `RIM`, `URA` ou `ÉMY`) ;
+- `form=evolved` permet de démarrer directement avec l’évolution pour les tests ;
 - `avatar` définit la photo de profil utilisée comme boss.
 
 Sans ces paramètres, le jeu affiche une cible de démonstration avec une
