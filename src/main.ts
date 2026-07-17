@@ -123,11 +123,13 @@ function resizeGame() {
 
   if (!running) {
     boss.x = viewWidth / 2;
-    boss.y = clamp(viewHeight * 0.22, 150, 200);
+    boss.y = viewWidth <= 680
+      ? clamp(viewHeight * 0.245, 205, 225)
+      : clamp(viewHeight * 0.22, 150, 200);
     player.x = viewWidth / 2;
     player.y = viewHeight - Math.max(64, viewHeight * 0.1);
   } else {
-    boss.y = clamp(boss.y, 145, viewHeight * 0.34);
+    boss.y = clamp(boss.y, viewWidth <= 680 ? 205 : 145, viewHeight * 0.36);
     player.x = clamp(player.x, 30, viewWidth - 30);
     player.y = clamp(player.y, playerTopBound(), viewHeight - 32);
   }
@@ -138,7 +140,9 @@ function reset() {
   player.x = viewWidth / 2;
   player.y = viewHeight - Math.max(64, viewHeight * 0.1);
   boss.x = viewWidth / 2;
-  boss.y = clamp(viewHeight * 0.22, 150, 200);
+  boss.y = viewWidth <= 680
+    ? clamp(viewHeight * 0.245, 205, 225)
+    : clamp(viewHeight * 0.22, 150, 200);
   boss.hp = boss.maxHp;
   boss.phase = 0;
   projectiles = [];
@@ -751,7 +755,8 @@ function draw() {
 
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.font = "700 14px Manrope, sans-serif";
+    const floatingTextSize = Math.round(clamp(viewWidth * 0.014, 16, 22));
+    ctx.font = `700 ${floatingTextSize}px Manrope, sans-serif`;
     for (const text of floatingTexts) {
       ctx.globalAlpha = clamp(text.life * 1.6, 0, 1);
       ctx.fillStyle = "#061126";

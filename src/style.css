@@ -106,7 +106,7 @@ footer,
 .message small,
 .title-kicker {
   color: rgba(223, 243, 255, 0.66);
-  font-size: 0.6rem;
+  font-size: clamp(0.7rem, 0.64rem + 0.2vw, 0.82rem);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -115,7 +115,7 @@ footer,
 .compact-brand strong {
   margin-top: 4px;
   font-family: "Marcellus", serif;
-  font-size: 1rem;
+  font-size: 1.16rem;
   font-weight: 400;
   letter-spacing: 0.04em;
 }
@@ -141,7 +141,7 @@ footer,
 dd {
   margin: 0;
   color: #f4fbff;
-  font-size: 0.88rem;
+  font-size: 1rem;
   font-weight: 800;
   letter-spacing: 0.05em;
 }
@@ -178,7 +178,7 @@ dd {
   top: 50%;
   color: #a5e9ff;
   content: "❀";
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   text-shadow: 0 0 10px #49bfff;
   transform: translateY(-50%);
 }
@@ -207,7 +207,7 @@ dd {
   overflow: hidden;
   color: #f2fbff;
   font-family: "Marcellus", serif;
-  font-size: 0.92rem;
+  font-size: 1.08rem;
   font-weight: 400;
   letter-spacing: 0.04em;
   text-align: center;
@@ -217,7 +217,7 @@ dd {
 
 #shield-state {
   color: #91e9c1;
-  font-size: 0.48rem;
+  font-size: 0.62rem;
   text-align: right;
 }
 
@@ -307,14 +307,14 @@ dd {
 
 .title-kicker {
   color: rgba(199, 236, 255, 0.8);
-  font-size: clamp(0.52rem, 1.5vw, 0.68rem);
+  font-size: clamp(0.68rem, 1.7vw, 0.88rem);
   letter-spacing: 0.28em;
 }
 
 .title-subtitle {
   color: #cfeeff;
   font-family: "Marcellus", serif;
-  font-size: clamp(0.76rem, 2vw, 1rem);
+  font-size: clamp(0.94rem, 2.2vw, 1.22rem);
   letter-spacing: 0.15em;
   text-shadow: 0 2px 12px #000;
   text-transform: uppercase;
@@ -324,7 +324,7 @@ dd {
   max-width: 590px;
   margin: clamp(18px, 3vh, 28px) 0 20px;
   color: rgba(232, 247, 255, 0.82);
-  font-size: clamp(0.88rem, 2vw, 1rem);
+  font-size: clamp(1rem, 2.1vw, 1.18rem);
   line-height: 1.55;
   text-shadow: 0 2px 12px #000;
 }
@@ -339,7 +339,7 @@ dd {
   color: #06142c;
   background: linear-gradient(135deg, #dff8ff, #6bd2ff);
   box-shadow: 0 12px 34px rgba(22, 139, 228, 0.34), inset 0 1px #fff;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -365,7 +365,7 @@ dd {
 
 .message small {
   margin-top: 14px;
-  font-size: 0.5rem;
+  font-size: 0.64rem;
 }
 
 .controls-touch {
@@ -427,7 +427,7 @@ footer p {
   }
 
   .compact-brand strong {
-    font-size: 0.78rem;
+    font-size: 0.92rem;
   }
 
   .stats {
@@ -437,7 +437,7 @@ footer p {
   }
 
   dd {
-    font-size: 0.7rem;
+    font-size: 0.84rem;
   }
 
   .boss-hud {
@@ -450,7 +450,13 @@ footer p {
   }
 
   .boss-heading {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
+
+  #shield-state {
+    text-align: center;
+    white-space: nowrap;
   }
 
   .title-lockup {
