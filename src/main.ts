@@ -42,7 +42,7 @@ const avatarUrl = params.get("avatar");
 const background = new Image();
 const avatar = new Image();
 
-background.src = `${import.meta.env.BASE_URL}assets/arena-hd2d.png`;
+background.src = `${import.meta.env.BASE_URL}assets/arena-blue-flower-2d.png`;
 avatar.crossOrigin = "anonymous";
 let avatarReady = false;
 if (avatarUrl && /^https:\/\//i.test(avatarUrl)) {
@@ -140,7 +140,7 @@ function finishGame(victory: boolean) {
   const subtitle = required(message.querySelector<HTMLElement>(".title-subtitle"), "Le sous-titre");
 
   if (victory) {
-    kicker.textContent = "✦  VERDICT DU JARDIN  ✦";
+    kicker.textContent = "❀  VERDICT DE BLUE FLOWER  ❀";
     heading.textContent = "URATISÉ";
     heading.dataset.text = "URATISÉ";
     subtitle.textContent = `${targetName} ne résiste plus`;
@@ -148,7 +148,7 @@ function finishGame(victory: boolean) {
       `La cible a perdu toute sa vitalité après ${wave} vague${wave > 1 ? "s" : ""}. Résultat de démonstration : aucune sanction Discord n’a été exécutée.`;
     startButton.querySelector("span")!.textContent = "Rejouer le verdict";
   } else {
-    kicker.textContent = "✦  LA FRICHE A TRIOMPHÉ  ✦";
+    kicker.textContent = "❀  LA FRICHE A TRIOMPHÉ  ❀";
     heading.textContent = "ÉCHEC";
     heading.dataset.text = "ÉCHEC";
     subtitle.textContent = "L’inactivité gagne du terrain";
@@ -350,11 +350,11 @@ function update(dt: number) {
         boss.hp -= projectile.damage;
         score += 25;
         screenShake = 3;
-        burst(projectile.x, projectile.y, "#ffb34f", 8);
-        floatingTexts.push({ x: boss.x + (Math.random() - 0.5) * 55, y: boss.y - 45, text: `-${projectile.damage}`, color: "#ffdc7e", life: 0.65, vy: -32 });
+        burst(projectile.x, projectile.y, "#65c9ff", 8);
+        floatingTexts.push({ x: boss.x + (Math.random() - 0.5) * 55, y: boss.y - 45, text: `-${projectile.damage}`, color: "#bcecff", life: 0.65, vy: -32 });
         if (boss.hp <= 0) {
           boss.hp = 0;
-          burst(boss.x, boss.y, "#ffe094", 70);
+          burst(boss.x, boss.y, "#8cddff", 70);
           updateHud();
           finishGame(true);
           return;
@@ -427,7 +427,7 @@ function drawBackground() {
     const x = (i * 137 + elapsed * (8 + (i % 3) * 4)) % (WIDTH + 80) - 40;
     const y = (i * 83) % HEIGHT;
     ctx.globalAlpha = 0.18 + (i % 4) * 0.05;
-    ctx.fillStyle = i % 3 === 0 ? "#fff1a8" : "#d6a74b";
+    ctx.fillStyle = i % 3 === 0 ? "#d9f7ff" : "#4ebaf4";
     ctx.fillRect(Math.round(x), y, i % 2 ? 2 : 3, i % 2 ? 2 : 3);
   }
   ctx.globalAlpha = 1;
@@ -533,7 +533,7 @@ function drawBoss() {
   }
 
   ctx.fillStyle = "#2a160a";
-  ctx.strokeStyle = "#f2d086";
+  ctx.strokeStyle = "#9bddff";
   ctx.lineWidth = 6;
   ctx.beginPath();
   ctx.arc(0, 0, boss.radius + 7, 0, Math.PI * 2);
@@ -563,7 +563,7 @@ function drawBoss() {
   }
   ctx.restore();
 
-  ctx.strokeStyle = "#5d3414";
+  ctx.strokeStyle = "#245d89";
   ctx.lineWidth = 3;
   for (let i = 0; i < 8; i += 1) {
     const angle = (Math.PI * 2 * i) / 8 + elapsed * 0.08;
@@ -590,9 +590,9 @@ function drawPlayer() {
   ctx.fill();
   ctx.globalAlpha = 1;
 
-  ctx.fillStyle = "#2d5c51";
+  ctx.fillStyle = "#244e83";
   ctx.fillRect(-15, -7, 30, 28);
-  ctx.fillStyle = "#55a292";
+  ctx.fillStyle = "#4d91ca";
   ctx.fillRect(-11, -5, 8, 22);
   ctx.fillStyle = "#ead7a5";
   ctx.fillRect(-10, -25, 20, 18);
@@ -631,11 +631,11 @@ function drawProjectile(projectile: Projectile) {
     ctx.fillStyle = "#dba6e9";
     ctx.fillRect(-2, -2, 4, 4);
   } else {
-    ctx.fillStyle = "#ffe28a";
-    ctx.shadowColor = "#ffb13b";
+    ctx.fillStyle = "#9be6ff";
+    ctx.shadowColor = "#35bfff";
     ctx.shadowBlur = 16;
     ctx.fillRect(-3, -12, 6, 22);
-    ctx.fillStyle = "#fff9d2";
+    ctx.fillStyle = "#f1fdff";
     ctx.fillRect(-1, -15, 2, 10);
   }
   ctx.restore();
