@@ -1,8 +1,9 @@
 # URATISATION
 
-Shoot’em up 2D pour navigateur créé pour la team de scantrad Blue Flower.
-Sa direction artistique repose sur des décors entièrement dessinés en 2D,
-un pixel art fantasy détaillé et une magie florale bleue propre à la team.
+Shoot’em up 2D responsive pour navigateur créé pour la team de scantrad Blue
+Flower. Le jeu occupe tout l'écran et adapte son arène aux téléphones, tablettes
+et ordinateurs. Sa direction artistique associe illustration fantasy moderne,
+accents pixel-art et magie florale bleue.
 
 ## Développement
 

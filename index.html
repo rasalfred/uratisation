@@ -3,62 +3,70 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#130f0a" />
+    <meta name="theme-color" content="#050a1c" />
     <meta
       name="description"
-      content="URATISATION, un shoot’em up HD-2D créé par la team Blue Flower."
+      content="URATISATION, le shoot’em up floral de la team Blue Flower."
     />
     <title>URATISATION — Blue Flower</title>
   </head>
   <body>
     <main class="game-shell">
-      <header class="topbar">
-        <div class="compact-brand" aria-label="Uratisation">
-          <span>Blue Flower présente</span>
-          <strong>URATISATION</strong>
-        </div>
-        <dl class="stats" aria-label="Informations de la partie">
-          <div><dt>Récolte</dt><dd id="score">0000</dd></div>
-          <div><dt>Vague</dt><dd id="wave">01</dd></div>
-          <div><dt>Vitalité</dt><dd id="lives">◆ ◆ ◆</dd></div>
-        </dl>
-      </header>
-
       <section class="arena-frame" aria-label="Zone de jeu">
-        <div class="ornament ornament-top" aria-hidden="true">❀</div>
-        <div class="boss-hud" id="boss-hud" aria-live="polite">
-          <div class="boss-heading">
-            <span class="boss-rank">Cible d’uratisation</span>
-            <strong id="target-name">Membre du staff</strong>
-            <span id="shield-state">Protégé par les mauvaises herbes</span>
-          </div>
-          <div class="health-track"><i id="boss-health"></i></div>
-        </div>
-
         <canvas id="game" width="960" height="720">
           Votre navigateur ne prend pas en charge Canvas.
         </canvas>
 
+        <header class="topbar">
+          <div class="compact-brand">
+            <i aria-hidden="true">✦</i>
+            <span><small>Team</small><strong>Blue Flower</strong></span>
+          </div>
+          <dl class="stats" aria-label="Informations de la partie">
+            <div><dt>Récolte</dt><dd id="score">0000</dd></div>
+            <div><dt>Vague</dt><dd id="wave">01</dd></div>
+            <div class="vitality"><dt>Vitalité</dt><dd id="lives">◆ ◆ ◆</dd></div>
+          </dl>
+        </header>
+
+        <div class="boss-hud" id="boss-hud" aria-live="polite">
+          <div class="boss-heading">
+            <span class="boss-rank">Cible</span>
+            <strong id="target-name">Membre du staff</strong>
+            <span id="shield-state">Protection végétale active</span>
+          </div>
+          <div class="health-track"><i id="boss-health"></i></div>
+        </div>
+
         <div class="vignette" aria-hidden="true"></div>
         <div class="message" id="message">
-          <div class="title-lockup" aria-label="Uratisation">
-            <span class="title-flourish">❀ &nbsp; LES CHRONIQUES DE BLUE FLOWER &nbsp; ❀</span>
-            <h1 data-text="URATISATION">URATISATION</h1>
-            <span class="title-subtitle">Le Jardin de l’Inactivité</span>
+          <div class="title-lockup">
+            <span class="title-kicker">Une opération Blue Flower</span>
+            <img
+              src="./assets/uratisation-logo.png"
+              alt="URATISATION"
+              width="1536"
+              height="1024"
+            />
+            <span class="title-subtitle">Le jardin de l’inactivité s’éveille</span>
           </div>
           <p id="message-copy">
-            Arrache les mauvaises herbes qui protègent la cible, puis frappe sa
-            photo de profil pour mener l’uratisation à son terme.
+            Libère la cible de ses mauvaises herbes, brise sa protection puis
+            frappe sa photo de profil jusqu’au verdict final.
           </p>
-          <button id="start" type="button"><span>Commencer la chasse</span></button>
-          <small>ZQSD / WASD / flèches · souris · tactile</small>
+          <button id="start" type="button">
+            <span>Entrer dans le jardin</span>
+            <i aria-hidden="true">→</i>
+          </button>
+          <small class="controls-desktop">ZQSD / WASD / flèches · souris</small>
+          <small class="controls-touch">Glisse ton doigt pour te déplacer</small>
         </div>
-      </section>
 
-      <footer>
-        <p><span class="status-dot"></span> Simulation — sanctions Discord désactivées</p>
-        <p class="hint">Détruis les gardiens végétaux pour briser la protection</p>
-      </footer>
+        <footer>
+          <p><span class="status-dot"></span> Simulation · sanctions désactivées</p>
+          <p class="hint">Élimine les mauvaises herbes avant d’attaquer la cible</p>
+        </footer>
+      </section>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>

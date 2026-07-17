@@ -33,16 +33,21 @@ const targetNameEl = required(document.querySelector<HTMLElement>("#target-name"
 const shieldState = required(document.querySelector<HTMLElement>("#shield-state"), "Le bouclier");
 const ctx = required(canvas.getContext("2d"), "Le contexte Canvas 2D");
 
-const WIDTH = 960;
-const HEIGHT = 720;
+let viewWidth = 960;
+let viewHeight = 720;
+let pixelRatio = 1;
 const params = new URLSearchParams(window.location.search);
 const rawTargetName = params.get("target")?.trim();
 const targetName = rawTargetName?.slice(0, 28) || "Membre du staff";
 const avatarUrl = params.get("avatar");
 const background = new Image();
 const avatar = new Image();
+const playerSprite = new Image();
+const weedSprites = new Image();
 
-background.src = `${import.meta.env.BASE_URL}assets/arena-blue-flower-2d.png`;
+background.src = `${import.meta.env.BASE_URL}assets/arena-modern-responsive.png`;
+playerSprite.src = `${import.meta.env.BASE_URL}assets/blue-flower-guardian.png`;
+weedSprites.src = `${import.meta.env.BASE_URL}assets/weed-guardians.png`;
 avatar.crossOrigin = "anonymous";
 let avatarReady = false;
 if (avatarUrl && /^https:\/\//i.test(avatarUrl)) {
@@ -52,9 +57,9 @@ if (avatarUrl && /^https:\/\//i.test(avatarUrl)) {
 targetNameEl.textContent = targetName;
 
 const keys = new Set<string>();
-const player: Body = { x: WIDTH / 2, y: HEIGHT - 90, radius: 19, vx: 0, vy: 0 };
+const player: Body = { x: viewWidth / 2, y: viewHeight - 90, radius: 19, vx: 0, vy: 0 };
 const boss: Body & { hp: number; maxHp: number; phase: number } = {
-  x: WIDTH / 2,
+  x: viewWidth / 2,
   y: 154,
   radius: 58,
   vx: 0,
@@ -86,11 +91,54 @@ const clamp = (value: number, min: number, max: number) => Math.max(min, Math.mi
 const collides = (a: Body, b: Body) => Math.hypot(a.x - b.x, a.y - b.y) < a.radius + b.radius;
 const guardingWeeds = () => weeds.filter((weed) => weed.guarding && weed.hp > 0).length;
 
+function playerTopBound() {
+  return Math.max(boss.y + boss.radius + 105, viewHeight * 0.43);
+}
+
+function resizeGame() {
+  const rect = canvas.getBoundingClientRect();
+  const nextWidth = Math.max(320, rect.width);
+  const nextHeight = Math.max(360, rect.height);
+  const ratioX = nextWidth / viewWidth;
+  const ratioY = nextHeight / viewHeight;
+
+  if (running) {
+    player.x *= ratioX;
+    player.y *= ratioY;
+    boss.x *= ratioX;
+    boss.y *= ratioY;
+    for (const body of [...weeds, ...projectiles, ...particles, ...floatingTexts]) {
+      body.x *= ratioX;
+      body.y *= ratioY;
+    }
+  }
+
+  viewWidth = nextWidth;
+  viewHeight = nextHeight;
+  pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.round(viewWidth * pixelRatio);
+  canvas.height = Math.round(viewHeight * pixelRatio);
+  boss.radius = clamp(Math.min(viewWidth, viewHeight) * 0.078, 42, 62);
+  player.radius = clamp(Math.min(viewWidth, viewHeight) * 0.027, 16, 21);
+
+  if (!running) {
+    boss.x = viewWidth / 2;
+    boss.y = clamp(viewHeight * 0.2, 118, 175);
+    player.x = viewWidth / 2;
+    player.y = viewHeight - Math.max(64, viewHeight * 0.1);
+  } else {
+    boss.y = clamp(boss.y, 110, viewHeight * 0.32);
+    player.x = clamp(player.x, 30, viewWidth - 30);
+    player.y = clamp(player.y, playerTopBound(), viewHeight - 32);
+  }
+  draw();
+}
+
 function reset() {
-  player.x = WIDTH / 2;
-  player.y = HEIGHT - 90;
-  boss.x = WIDTH / 2;
-  boss.y = 154;
+  player.x = viewWidth / 2;
+  player.y = viewHeight - Math.max(64, viewHeight * 0.1);
+  boss.x = viewWidth / 2;
+  boss.y = clamp(viewHeight * 0.2, 118, 175);
   boss.hp = boss.maxHp;
   boss.phase = 0;
   projectiles = [];
@@ -135,22 +183,17 @@ function startGame() {
 function finishGame(victory: boolean) {
   running = false;
   bossHud.classList.add("hidden");
-  const kicker = required(message.querySelector<HTMLElement>(".title-flourish"), "Le surtitre");
-  const heading = required(message.querySelector<HTMLElement>("h1"), "Le titre");
+  const kicker = required(message.querySelector<HTMLElement>(".title-kicker"), "Le surtitre");
   const subtitle = required(message.querySelector<HTMLElement>(".title-subtitle"), "Le sous-titre");
 
   if (victory) {
     kicker.textContent = "❀  VERDICT DE BLUE FLOWER  ❀";
-    heading.textContent = "URATISÉ";
-    heading.dataset.text = "URATISÉ";
     subtitle.textContent = `${targetName} ne résiste plus`;
     messageCopy.textContent =
       `La cible a perdu toute sa vitalité après ${wave} vague${wave > 1 ? "s" : ""}. Résultat de démonstration : aucune sanction Discord n’a été exécutée.`;
     startButton.querySelector("span")!.textContent = "Rejouer le verdict";
   } else {
     kicker.textContent = "❀  LA FRICHE A TRIOMPHÉ  ❀";
-    heading.textContent = "ÉCHEC";
-    heading.dataset.text = "ÉCHEC";
     subtitle.textContent = "L’inactivité gagne du terrain";
     messageCopy.textContent =
       `Les mauvaises herbes ont protégé ${targetName}. Tu as récolté ${score} points avant de tomber.`;
@@ -163,7 +206,7 @@ function spawnProtectionWave(count: number) {
   wave += protectionStage > 0 ? 1 : 0;
   for (let i = 0; i < count; i += 1) {
     const angle = (Math.PI * 2 * i) / count + Math.PI / 2;
-    const distance = 118 + (i % 2) * 34;
+    const distance = Math.min(118 + (i % 2) * 34, viewWidth * 0.28, viewHeight * 0.19);
     const hp = 3 + wave;
     weeds.push({
       x: boss.x + Math.cos(angle) * distance,
@@ -187,9 +230,10 @@ function spawnProtectionWave(count: number) {
 function spawnWanderer() {
   const fromLeft = Math.random() > 0.5;
   const hp = 2 + Math.floor(wave / 2);
+  const verticalSpace = Math.max(90, viewHeight - boss.y - 250);
   weeds.push({
-    x: fromLeft ? -30 : WIDTH + 30,
-    y: 270 + Math.random() * 270,
+    x: fromLeft ? -30 : viewWidth + 30,
+    y: boss.y + 120 + Math.random() * verticalSpace,
     radius: 20,
     vx: fromLeft ? 55 + wave * 4 : -(55 + wave * 4),
     vy: 18 + Math.random() * 28,
@@ -210,7 +254,7 @@ function firePlayer() {
       y: player.y - 22,
       radius: 5,
       vx: offset * 1.25,
-      vy: -610,
+      vy: -clamp(viewHeight * 0.86, 500, 720),
       hostile: false,
       damage: 2,
     });
@@ -264,7 +308,7 @@ function update(dt: number) {
   shieldMessageCooldown = Math.max(0, shieldMessageCooldown - dt);
   screenShake = Math.max(0, screenShake - dt * 32);
   boss.phase += dt;
-  boss.x = WIDTH / 2 + Math.sin(boss.phase * 0.65) * 112;
+  boss.x = viewWidth / 2 + Math.sin(boss.phase * 0.65) * Math.min(112, viewWidth * 0.18);
 
   const horizontal =
     Number(keys.has("arrowright") || keys.has("d")) -
@@ -273,8 +317,9 @@ function update(dt: number) {
     Number(keys.has("arrowdown") || keys.has("s")) -
     Number(keys.has("arrowup") || keys.has("z") || keys.has("w"));
   const length = Math.hypot(horizontal, vertical) || 1;
-  player.x = clamp(player.x + (horizontal / length) * 340 * dt, 36, WIDTH - 36);
-  player.y = clamp(player.y + (vertical / length) * 340 * dt, 315, HEIGHT - 38);
+  const playerSpeed = clamp(Math.min(viewWidth, viewHeight) * 0.5, 270, 380);
+  player.x = clamp(player.x + (horizontal / length) * playerSpeed * dt, 30, viewWidth - 30);
+  player.y = clamp(player.y + (vertical / length) * playerSpeed * dt, playerTopBound(), viewHeight - 34);
 
   shotTimer -= dt;
   if (shotTimer <= 0) {
@@ -374,11 +419,11 @@ function update(dt: number) {
   projectiles = projectiles.filter((projectile) =>
     projectile.radius > 0 &&
     projectile.y > -30 &&
-    projectile.y < HEIGHT + 30 &&
+    projectile.y < viewHeight + 30 &&
     projectile.x > -40 &&
-    projectile.x < WIDTH + 40
+    projectile.x < viewWidth + 40
   );
-  weeds = weeds.filter((weed) => weed.hp > 0 && weed.y < HEIGHT + 60 && weed.x > -80 && weed.x < WIDTH + 80);
+  weeds = weeds.filter((weed) => weed.hp > 0 && weed.y < viewHeight + 60 && weed.x > -80 && weed.x < viewWidth + 80);
 
   if (guardingWeeds() === 0) {
     if (protectionStage === 0 && boss.hp <= 68) {
@@ -409,23 +454,23 @@ function update(dt: number) {
 
 function drawBackground() {
   if (background.complete && background.naturalWidth > 0) {
-    const scale = Math.max(WIDTH / background.naturalWidth, HEIGHT / background.naturalHeight);
+    const scale = Math.max(viewWidth / background.naturalWidth, viewHeight / background.naturalHeight);
     const width = background.naturalWidth * scale;
     const height = background.naturalHeight * scale;
-    ctx.drawImage(background, (WIDTH - width) / 2, (HEIGHT - height) / 2, width, height);
+    ctx.drawImage(background, (viewWidth - width) / 2, (viewHeight - height) / 2, width, height);
   } else {
-    const gradient = ctx.createLinearGradient(0, 0, 0, HEIGHT);
+    const gradient = ctx.createLinearGradient(0, 0, 0, viewHeight);
     gradient.addColorStop(0, "#294b32");
     gradient.addColorStop(1, "#6f542d");
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.fillRect(0, 0, viewWidth, viewHeight);
   }
   ctx.fillStyle = "rgba(17, 11, 5, 0.16)";
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  ctx.fillRect(0, 0, viewWidth, viewHeight);
 
   for (let i = 0; i < 22; i += 1) {
-    const x = (i * 137 + elapsed * (8 + (i % 3) * 4)) % (WIDTH + 80) - 40;
-    const y = (i * 83) % HEIGHT;
+    const x = (i * 137 + elapsed * (8 + (i % 3) * 4)) % (viewWidth + 80) - 40;
+    const y = (i * 83) % viewHeight;
     ctx.globalAlpha = 0.18 + (i % 4) * 0.05;
     ctx.fillStyle = i % 3 === 0 ? "#d9f7ff" : "#4ebaf4";
     ctx.fillRect(Math.round(x), y, i % 2 ? 2 : 3, i % 2 ? 2 : 3);
@@ -453,6 +498,33 @@ function drawWeed(weed: Weed) {
     ctx.arc(0, 0, weed.radius + 8 + Math.sin(elapsed * 4) * 2, 0, Math.PI * 2);
     ctx.stroke();
     ctx.setLineDash([]);
+  }
+
+  if (weedSprites.complete && weedSprites.naturalWidth > 0) {
+    const index = weed.kind === "bramble" ? 0 : weed.kind === "thistle" ? 1 : 2;
+    const cellWidth = weedSprites.naturalWidth / 3;
+    const size = weed.radius * 5;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(
+      weedSprites,
+      index * cellWidth,
+      0,
+      cellWidth,
+      weedSprites.naturalHeight,
+      -size / 2,
+      -size * 0.58,
+      size,
+      size * 0.72
+    );
+
+    if (weed.hp < weed.maxHp) {
+      ctx.fillStyle = "rgba(2, 8, 16, 0.72)";
+      ctx.fillRect(-20, weed.radius + 13, 40, 5);
+      ctx.fillStyle = "#76d99a";
+      ctx.fillRect(-19, weed.radius + 14, 38 * (weed.hp / weed.maxHp), 3);
+    }
+    ctx.restore();
+    return;
   }
 
   const main = weed.kind === "thistle" ? "#68418f" : weed.kind === "nettle" ? "#367f45" : "#345c2e";
@@ -590,6 +662,15 @@ function drawPlayer() {
   ctx.fill();
   ctx.globalAlpha = 1;
 
+  if (playerSprite.complete && playerSprite.naturalWidth > 0) {
+    const height = clamp(Math.min(viewWidth, viewHeight) * 0.28, 120, 180);
+    const width = height * (playerSprite.naturalWidth / playerSprite.naturalHeight);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(playerSprite, -width / 2, -height + 25, width, height);
+    ctx.restore();
+    return;
+  }
+
   ctx.fillStyle = "#244e83";
   ctx.fillRect(-15, -7, 30, 28);
   ctx.fillStyle = "#4d91ca";
@@ -642,38 +723,42 @@ function drawProjectile(projectile: Projectile) {
 }
 
 function draw() {
+  ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+  ctx.clearRect(0, 0, viewWidth, viewHeight);
   ctx.save();
   if (screenShake > 0) {
     ctx.translate((Math.random() - 0.5) * screenShake, (Math.random() - 0.5) * screenShake);
   }
   drawBackground();
-  drawBoss();
-  const sortedWeeds = [...weeds].sort((a, b) => a.y - b.y);
-  for (const weed of sortedWeeds) drawWeed(weed);
-  for (const projectile of projectiles) drawProjectile(projectile);
+  if (running) {
+    drawBoss();
+    const sortedWeeds = [...weeds].sort((a, b) => a.y - b.y);
+    for (const weed of sortedWeeds) drawWeed(weed);
+    for (const projectile of projectiles) drawProjectile(projectile);
 
-  for (const particle of particles) {
-    ctx.globalAlpha = clamp(particle.life / particle.maxLife, 0, 1);
-    ctx.fillStyle = particle.color;
-    ctx.fillRect(
-      Math.round(particle.x - particle.radius / 2),
-      Math.round(particle.y - particle.radius / 2),
-      Math.ceil(particle.radius),
-      Math.ceil(particle.radius)
-    );
-  }
-  ctx.globalAlpha = 1;
-  drawPlayer();
+    for (const particle of particles) {
+      ctx.globalAlpha = clamp(particle.life / particle.maxLife, 0, 1);
+      ctx.fillStyle = particle.color;
+      ctx.fillRect(
+        Math.round(particle.x - particle.radius / 2),
+        Math.round(particle.y - particle.radius / 2),
+        Math.ceil(particle.radius),
+        Math.ceil(particle.radius)
+      );
+    }
+    ctx.globalAlpha = 1;
+    drawPlayer();
 
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.font = "700 16px Cinzel, serif";
-  for (const text of floatingTexts) {
-    ctx.globalAlpha = clamp(text.life * 1.6, 0, 1);
-    ctx.fillStyle = "#2a160a";
-    ctx.fillText(text.text, text.x + 2, text.y + 2);
-    ctx.fillStyle = text.color;
-    ctx.fillText(text.text, text.x, text.y);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = "700 14px Manrope, sans-serif";
+    for (const text of floatingTexts) {
+      ctx.globalAlpha = clamp(text.life * 1.6, 0, 1);
+      ctx.fillStyle = "#061126";
+      ctx.fillText(text.text, text.x + 2, text.y + 2);
+      ctx.fillStyle = text.color;
+      ctx.fillText(text.text, text.x, text.y);
+    }
   }
   ctx.globalAlpha = 1;
   ctx.restore();
@@ -691,8 +776,8 @@ function loop(time: number) {
 function movePointer(event: PointerEvent) {
   if (!pointerActive || !running) return;
   const rect = canvas.getBoundingClientRect();
-  player.x = clamp(((event.clientX - rect.left) / rect.width) * WIDTH, 36, WIDTH - 36);
-  player.y = clamp(((event.clientY - rect.top) / rect.height) * HEIGHT, 315, HEIGHT - 38);
+  player.x = clamp(((event.clientX - rect.left) / rect.width) * viewWidth, 30, viewWidth - 30);
+  player.y = clamp(((event.clientY - rect.top) / rect.height) * viewHeight, playerTopBound(), viewHeight - 34);
 }
 
 window.addEventListener("keydown", (event) => {
@@ -712,6 +797,9 @@ canvas.addEventListener("pointerup", () => { pointerActive = false; });
 canvas.addEventListener("pointercancel", () => { pointerActive = false; });
 startButton.addEventListener("click", startGame);
 background.addEventListener("load", draw);
+playerSprite.addEventListener("load", draw);
+weedSprites.addEventListener("load", draw);
+window.addEventListener("resize", resizeGame);
 
 bossHud.classList.add("hidden");
-draw();
+resizeGame();
