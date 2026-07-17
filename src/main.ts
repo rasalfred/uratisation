@@ -123,11 +123,11 @@ function resizeGame() {
 
   if (!running) {
     boss.x = viewWidth / 2;
-    boss.y = clamp(viewHeight * 0.2, 118, 175);
+    boss.y = clamp(viewHeight * 0.22, 150, 200);
     player.x = viewWidth / 2;
     player.y = viewHeight - Math.max(64, viewHeight * 0.1);
   } else {
-    boss.y = clamp(boss.y, 110, viewHeight * 0.32);
+    boss.y = clamp(boss.y, 145, viewHeight * 0.34);
     player.x = clamp(player.x, 30, viewWidth - 30);
     player.y = clamp(player.y, playerTopBound(), viewHeight - 32);
   }
@@ -138,7 +138,7 @@ function reset() {
   player.x = viewWidth / 2;
   player.y = viewHeight - Math.max(64, viewHeight * 0.1);
   boss.x = viewWidth / 2;
-  boss.y = clamp(viewHeight * 0.2, 118, 175);
+  boss.y = clamp(viewHeight * 0.22, 150, 200);
   boss.hp = boss.maxHp;
   boss.phase = 0;
   projectiles = [];
