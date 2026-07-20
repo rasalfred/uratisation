@@ -291,6 +291,7 @@ dd {
 
 .title-lockup {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   justify-items: center;
   width: min(92vw, 920px);
   filter: drop-shadow(0 14px 28px rgba(0, 6, 30, 0.62));
@@ -307,11 +308,16 @@ dd {
 
 .result-title {
   display: none;
-  width: min(96vw, 1040px);
+  width: 100%;
   height: auto;
+  max-width: 1040px;
   max-height: 28vh;
   margin: clamp(8px, 2vh, 20px) 0;
   object-fit: contain;
+}
+
+.message.result .title-lockup {
+  width: min(96vw, 1040px);
 }
 
 .message.result .game-title {
